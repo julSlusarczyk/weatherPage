@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Weather App',
       theme: ThemeData(
         primarySwatch: Colors.amber,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -33,23 +33,38 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     load();
   }
+  //TODO Checking if there is internet connection
   String cityNameAndCountry ="";
-
-  Widget wet = CircularProgressIndicator();
-  Widget weatherIcon = CircularProgressIndicator();
+  Widget weatherCard = CircularProgressIndicator();
 
   load() async{
-    Weather w = await wf.currentWeatherByCityName('Trzebinia');
+    Weather w = await wf.currentWeatherByCityName('Trzebinia'); //TODO Store City Name in SharedPreferences
     setState(() {
-      wet=Text(w.weatherDescription);
-      cityNameAndCountry=w.areaName+", "+w.country;
-      var ico = w.weatherIcon;
-      weatherIcon = Image.network('http://openweathermap.org/img/wn/$ico@2x.png');
+      cityNameAndCountry = "${w.areaName}, ${w.country}";
+      weatherCard = cart(w.weatherIcon, w.temperature.celsius.round().toString(), w.weatherDescription);
     });
   }
 
-  Widget todayWeatherCard(var temperature, var areaName, var country, var weatherIcon, ){
-
+  Widget cart(var icon, var temp, var desc) {
+    var ico = Image.network('http://openweathermap.org/img/wn/$icon@2x.png');
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal:8.0, vertical:20.0),
+        child: Column(
+          children: <Widget>[
+            ico,
+            Padding(
+              padding: const EdgeInsets.only(top:8.0),
+              child: Text(temp + "°C"),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(desc),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -68,12 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.refresh),
               onPressed: (){
                 setState(() {
-                  wet = CircularProgressIndicator();
+                  weatherCard = CircularProgressIndicator();
                   load();
                 });
               }),
           IconButton(
-              icon: Icon(Icons.menu),
+              icon: Icon(Icons.menu), //TODO Menu with changing city name and change kelvin/celsius/fahrenheit
               onPressed: (){})
         ],
       ),
@@ -84,41 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text(cityNameAndCountry),
               alignment: Alignment.centerLeft,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: <Widget>[
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal:8.0, vertical:20.0),
-                        child: Column(
-                          children: <Widget>[
-                            weatherIcon,
-                            Padding(
-                              padding: const EdgeInsets.only(top:8.0),
-                              child: Text(
-                                "temp",
-                                style: TextStyle(
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: wet,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-
-
-                  ],
-                ),
-              ),
-            ),
+            weatherCard,
             Spacer(),
             Row(
               children: [
